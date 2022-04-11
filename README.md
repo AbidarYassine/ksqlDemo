@@ -166,6 +166,8 @@ FROM   RATINGS_CLUBS_PER_15MIN
 WHERE  FIRST_NAME='Wiam'
 AND  WINDOWSTART > '2020-07-06T15:30:00.000';
 ```
+We can also create joins between tables 
+
 
 ## Part 03 : Show REST API with [Postman](https://github.com/confluentinc/demo-scene/blob/master/build-a-streaming-pipeline/ksqlDB.postman_collection.json)
 
