@@ -169,7 +169,6 @@ AND  WINDOWSTART > '2020-07-06T15:30:00.000';
 
 ## Part 03 : Show REST API with [Postman](https://github.com/confluentinc/demo-scene/blob/master/build-a-streaming-pipeline/ksqlDB.postman_collection.json)
 
-image:postman.png[postman]
 
 ```jsx
 {"ksql":
