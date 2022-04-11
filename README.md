@@ -1,4 +1,4 @@
-Streaming ETL demo - Enriching event stream data with CDC data from MySQL
+## ******Streaming ETL demo - Enriching event stream data with CDC data from MySQL******
 
 ## ****Pre-reqs:****
 
