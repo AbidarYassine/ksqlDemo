@@ -1,0 +1,8 @@
+//testing in postman
+//localhost:8084/query
+
+//body
+{"ksql":
+"SELECT TIMESTAMPTOSTRING(WINDOWSTART, 'yyyy-MM-dd HH:mm:ss') 
+AS WINDOW_START_TS,FIRST_NAME,COUNT_CLUBS FROM RATINGS_CLUBS_PER_15MIN;",
+"streamProperties":{"ksql.streams.auto.offset.reset":"earliest"}}

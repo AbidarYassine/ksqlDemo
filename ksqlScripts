@@ -1,0 +1,66 @@
+CREATE SOURCE CONNECTOR SOURCE_MYSQL_03 WITH (
+    'connector.class' = 'io.debezium.connector.mysql.MySqlConnector',
+    'database.hostname' = 'mysql',
+    'database.port' = '3306',
+    'database.user' = 'debezium',
+    'database.password' = 'dbz',
+    'database.server.name' = 'asgard',
+    'table.whitelist' = 'demo.customers',
+    'database.history.kafka.bootstrap.servers' = 'kafka:29092',
+    'database.history.kafka.topic' = 'dbhistory.demo' ,
+    'include.schema.changes' = 'false',
+    'transforms'= 'unwrap,extractkey',
+    'transforms.unwrap.type'= 'io.debezium.transforms.ExtractNewRecordState',
+    'transforms.extractkey.type'= 'org.apache.kafka.connect.transforms.ExtractField$Key',
+    'transforms.extractkey.field'= 'id',
+    'key.converter'= 'org.apache.kafka.connect.storage.StringConverter',
+    'value.converter'= 'io.confluent.connect.avro.AvroConverter',
+    'value.converter.schema.registry.url'= 'http://schema-registry:8081'
+    );
+
+
+
+CREATE STREAM USERS_STREAM (CUSTOMER_ID VARCHAR KEY) WITH (KAFKA_TOPIC='asgard.demo.CUSTOMERS', VALUE_FORMAT='AVRO');
+
+SET 'auto.offset.reset' = 'earliest';
+
+SELECT TIMESTAMPTOSTRING(ROWTIME, 'HH:mm:ss') AS EVENT_TIME,
+       ID,
+       FIRST_NAME,
+       LAST_NAME,
+       EMAIL,
+       CLUB_STATUS
+  FROM USERS_STREAM WHERE ID=190
+  EMIT CHANGES;
+
+
+UPDATE CUSTOMERS SET EMAIL = 'WIAM@example.com' where ID=190;
+
+
+CREATE STREAM CLUB_STATUS AS
+SELECT CLUB_STATUS, EMAIL, STARS, MESSAGE
+FROM   USERS_STREAM
+WHERE CLUB_STATUS = 'checked'
+PARTITION BY EMAIL;
+
+
+CREATE TABLE RATINGS_CLUBS_PER_15MIN  AS
+SELECT FIRST_NAME,COUNT(*) AS COUNT_CLUBS
+  FROM CLUB_STATUS
+        WINDOW TUMBLING (SIZE 15 MINUTE)
+  GROUP BY FIRST_NAME
+  EMIT CHANGES;
+
+SELECT FIRST_NAME , COUNT_CLUBS 
+FROM RATINGS_CLUBS_PER_15MIN
+WHERE FIRST_NAME='Wiam'
+EMIT CHANGES;
+
+
+SELECT TIMESTAMPTOSTRING(WINDOWSTART, 'yyyy-MM-dd 
+HH:mm:ss') AS WINDOW_START_TS,
+     FIRST_NAME,       
+     COUNT_CLUBS
+FROM   RATINGS_CLUBS_PER_15MIN                      
+WHERE  FIRST_NAME='Wiam'
+ AND  WINDOWSTART > '2020-07-06T15:30:00.000';
